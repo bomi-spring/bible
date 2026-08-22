@@ -178,7 +178,17 @@ const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");clearTi
 /* ═══════ 데이터 정규화 ═══════ */
 const clean = t => String(t).replace(/\s+([!?.,;:）\)])/g,"$1").replace(/\s{2,}/g," ").trim();
 let noBang = localStorage.getItem("bible.nobang")==="1";
-const disp = t => noBang ? String(t).replace(/[!?]/g,"").replace(/\s{2,}/g," ").trim() : t;
+const ENT={"&#x27;":"'","&#39;":"'","&quot;":'"',"&amp;":"&","&lt;":"<","&gt;":">","&nbsp;":" "};
+function disp(t){
+  t = String(t).replace(/&(?:#x27|#39|quot|amp|lt|gt|nbsp);/g, m => ENT[m] || m);
+  if(/[A-Za-z][A-Za-z ]*\d+:\d+/.test(t))
+    t = t.replace(/\[\s*\(?\s*[A-Za-z][A-Za-z ]*\d+:\d+\s*\)?/g,"").replace(/\s*\]\s*$/,"");
+  if(noBang)
+    t = t.replace(/\([\u4e00-\u9fff]+\)/g,"")
+         .replace(/[!?.;:·\u201c\u201d\u2018\u2019\u300c\u300d\u300e\u300f"'`]/g,"")
+         .replace(/\s+,/g,",");
+  return t.replace(/\s{2,}/g," ").trim();
+}
 function normalize(raw){
   const out=[];
   const put=(name,ch)=>{ const i=IDX[norm(name)]; out.push({idx:i===undefined?999:i,name:(i!==undefined?BOOKS[i][0]:name),chapters:ch}); };
@@ -380,9 +390,9 @@ function drawSet(){
     <div class="row"><span>어두운 모드</span><button class="btn" id="th">전환</button></div>
     <div class="row"><span>형광펜 ${Object.keys(HL).length}개</span><button class="btn" id="exp">백업 저장</button></div>
     <div class="row"><span>형광펜 복원</span><input type="file" id="imp" accept=".json" style="max-width:52%"></div>
-    <div class="row"><span>느낌표·물음표 숨기기</span><button class="btn" id="bang">${noBang?"켜짐":"꺼짐"}</button></div>
+    <div class="row"><span>문장부호 정리 (쉼표·괄호 유지)</span><button class="btn" id="bang">${noBang?"켜짐":"꺼짐"}</button></div>
     <div class="row"><span>성경 데이터 교체</span><input type="file" id="re" accept=".json" style="max-width:52%"></div>
-    <div class="row"><span>버전 <b>v5</b></span><button class="btn" id="upd">업데이트 확인</button></div>`;
+    <div class="row"><span>버전 <b>v7</b></span><button class="btn" id="upd">업데이트 확인</button></div>`;
   $("upd").onclick=async()=>{
     try{
       if("serviceWorker" in navigator){
