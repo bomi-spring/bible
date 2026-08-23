@@ -1,5 +1,5 @@
 /* v3 — 네트워크 우선(network-first), 오프라인일 때만 캐시 사용 */
-const C = "bible-v9";
+const C = "bible-v10";
 const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {

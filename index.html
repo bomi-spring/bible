@@ -196,7 +196,11 @@ function normalize(raw){
   const out=[];
   const put=(name,ch)=>{ const i=IDX[norm(name)]; out.push({idx:i===undefined?999:i,name:(i!==undefined?BOOKS[i][0]:name),chapters:ch}); };
 
-  if(Array.isArray(raw) && raw[0] && Array.isArray(raw[0].chapters)){          // [{name,chapters:[[..]]}]
+  if(Array.isArray(raw) && raw[0] && Array.isArray(raw[0].chapters) && raw[0].chapters[0] && raw[0].chapters[0].verses){
+    raw.forEach(b=>put(b.book||b.name, b.chapters
+      .slice().sort((x,y)=>x.chapter-y.chapter)
+      .map(c=>c.verses.slice().sort((x,y)=>x.verse-y.verse).map(v=>clean(v.text)))));
+  }else if(Array.isArray(raw) && raw[0] && Array.isArray(raw[0].chapters)){          // [{name,chapters:[[..]]}]
     raw.forEach(b=>put(b.name||b.abbrev||b.book,b.chapters.map(c=>c.map(clean))));
   }else if(Array.isArray(raw) && raw[0] && (raw[0].text!==undefined)){         // [{book,chapter,verse,text}]
     const m={};
@@ -401,7 +405,7 @@ function drawSet(){
     <div class="row"><span>영어 병기${EN?"":" (파일 필요)"}</span><button class="btn" id="enb">${showEn&&EN?"켜짐":"꺼짐"}</button></div>
     <div class="row"><span>영어 성경 파일</span><input type="file" id="enf" accept=".json,.txt,.js,application/json,text/plain" style="max-width:52%"></div>
     <div class="row"><span>성경 데이터 교체</span><input type="file" id="re" accept=".json,.txt,.js,application/json,text/plain" style="max-width:52%"></div>
-    <div class="row"><span>버전 <b>v9</b></span><button class="btn" id="upd">업데이트 확인</button></div>`;
+    <div class="row"><span>버전 <b>v10</b></span><button class="btn" id="upd">업데이트 확인</button></div>`;
   $("upd").onclick=async()=>{
     try{
       if("serviceWorker" in navigator){
